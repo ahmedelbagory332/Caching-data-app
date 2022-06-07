@@ -6,8 +6,12 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.asLiveData
 import androidx.room.withTransaction
 import com.egypt.hilt.api.RestaurantApi
- import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.launch
 import java.lang.Exception
 import javax.inject.Inject
 
@@ -32,9 +36,10 @@ class RestaurantRepository @Inject constructor(private val api: RestaurantApi, p
 
 
 
-  suspend  fun getRestaurant() {
+    fun getRestaurant() {
 
-             _isLoading.emit(true)
+        CoroutineScope(Dispatchers.IO).launch {
+            _isLoading.emit(true)
             try {
 
                 db.withTransaction {
@@ -46,9 +51,6 @@ class RestaurantRepository @Inject constructor(private val api: RestaurantApi, p
                     restaurantsLiveData.emit(it)
                     _isLoading.emit(false)
                 }
-
-
-
             } catch (e: Exception) {
 
                 restaurantDao.getAllRestaurants().collect {
@@ -57,6 +59,8 @@ class RestaurantRepository @Inject constructor(private val api: RestaurantApi, p
                 }
             }
 
+
+        }
 
     }
 }
